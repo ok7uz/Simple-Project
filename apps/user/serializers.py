@@ -13,23 +13,25 @@ from apps.user.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'image', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(write_only=True)
-    password = PasswordField()
+    username = serializers.CharField(write_only=True)
+    password = PasswordField(write_only=True)
+    access = serializers.UUIDField(read_only=True)
+    refresh = serializers.UUIDField(read_only=True)
     
     def validate(self, attrs):
-        user = authenticate(**attrs)
-        if not user:
+        self.user = authenticate(**attrs)
+        if not self.user:
             raise AuthenticationFailed()
 
         data = {}
-        refresh = self.get_token(user)
+        refresh = self.get_token(self.user)
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)
-        update_last_login(None, user)
+        update_last_login(None, self.user)
         return data
     
     def get_token(self, user):
@@ -42,14 +44,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'password2', 'first_name', 'last_name', 'image']
+        fields = ['username', 'password', 'password2', 'first_name', 'last_name']
 
     def create(self, validated_data):
         user = User.objects.create(
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            image=validated_data['image'],
+            username=validated_data['username'],
         )
         user.set_password(validated_data['password'])
         user.save()

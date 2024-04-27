@@ -1,4 +1,4 @@
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -6,31 +6,29 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
-from apps.user.models import User
 from apps.user.serializers import UserSerializer, RegisterSerializer, LoginSerializer
 
 
 class ProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
 
-    @swagger_auto_schema(
-        responses={200: UserSerializer()},
-        tags=['User']
+    @extend_schema(
+        responses={200: serializer_class},
+        tags=['Auth']
     )
     def get(self, request):
-        serializer = UserSerializer(request.user, context={'request': request})
+        serializer = self.serializer_class(request.user, context={'request': request})
         return Response(serializer.data, status=200)
 
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
 
-    @swagger_auto_schema(
-        tags=['User'],
-        request_body=LoginSerializer(),
-        responses={201: 'Tokens'}
-    )
+    @extend_schema(tags=['Auth'],
+                         request=serializer_class,
+                         responses={201: serializer_class})
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         try:
@@ -41,17 +39,16 @@ class LoginView(APIView):
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
-    @swagger_auto_schema(
-        tags=['User'],
-        request_body=RegisterSerializer(),
-        responses={200: UserSerializer()}
-    )
+    @extend_schema(tags=['Auth'],
+                         request=serializer_class(),
+                         responses={200: UserSerializer()})
     def post(self, request):
-        serializer = RegisterSerializer(data=request.data, context={'request': request})
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=201)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

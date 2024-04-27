@@ -1,4 +1,4 @@
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -12,7 +12,7 @@ from apps.event.serializers import RelativeSerializer, EventSerializer, VoteSeri
 class RelativeListView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Relative'],
         responses={200: RelativeSerializer(many=True)},
     )
@@ -21,10 +21,10 @@ class RelativeListView(APIView):
         serializer = RelativeSerializer(relatives, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Relative'],
         responses={200: RelativeSerializer},
-        request_body=RelativeSerializer,
+        request=RelativeSerializer,
     )
     def post(self, request):
         serializer = RelativeSerializer(data=request.data, context={'request': request})
@@ -37,7 +37,7 @@ class RelativeListView(APIView):
 class EventListView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Event'],
         responses={200: EventSerializer(many=True)},
     )
@@ -46,10 +46,10 @@ class EventListView(APIView):
         serializer = EventSerializer(relatives, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Event'],
         responses={200: EventSerializer},
-        request_body=EventSerializer,
+        request=EventSerializer,
     )
     def post(self, request):
         serializer = EventSerializer(data=request.data, context={'request': request})
@@ -62,7 +62,7 @@ class EventListView(APIView):
 class VoteView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Vote'],
         responses={200: VoteSerializer(many=True)},
     )
@@ -72,14 +72,13 @@ class VoteView(APIView):
         serializer = VoteSerializer(votes, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
+    @extend_schema(
         tags=['Vote'],
         responses={200: VoteSerializer},
-        request_body=VoteSerializer,
+        request=VoteSerializer,
     )
     def post(self, request, event_id):
-        request.data['event_id'] = event_id
-        serializer = VoteSerializer(data=request.data, context={'request': request})
+        serializer = VoteSerializer(data=request.data, context={'request': request, 'event_id': event_id})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
