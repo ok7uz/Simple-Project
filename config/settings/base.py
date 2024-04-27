@@ -9,7 +9,10 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    'apps.user.apps.UserConfig',
+    'apps.event.apps.EventConfig',
+]
 
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -97,3 +100,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DATETIME_FORMAT': '%s',
 }
+
+AUTH_USER_MODEL = 'user.User'
