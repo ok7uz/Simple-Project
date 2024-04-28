@@ -76,8 +76,8 @@ class EventListView(APIView):
         responses={200: EventSerializer(many=True)},
     )
     def get(self, request):
-        relatives = request.user.events.all()
-        serializer = EventSerializer(relatives, many=True, context={'request': request})
+        events = request.user.events.all()
+        serializer = EventSerializer(events, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
@@ -91,6 +91,40 @@ class EventListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EventDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        tags=['Event'],
+        responses={200: EventSerializer},
+    )
+    def get(self, request, event_id):
+        event = get_object_or_404(Event, id=event_id)
+        serializer = EventSerializer(event, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=['Event'],
+        responses={200: EventSerializer},
+        request=EventSerializer,
+    )
+    def put(self, request, event_id):
+        event = get_object_or_404(Event, id=event_id)
+        serializer = EventSerializer(event, data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @extend_schema(
+        tags=['Event'],
+    )
+    def delete(self, request, event_id):
+        event = get_object_or_404(Event, id=event_id)
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class VoteView(APIView):
