@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.event.models import Event, Relative, Vote
+
+
+admin.site.register(Relative)
+admin.site.register(Event)
+admin.site.register(Vote)
