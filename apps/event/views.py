@@ -34,6 +34,40 @@ class RelativeListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class RelativeDetailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        tags=['Relative'],
+        responses={200: RelativeSerializer},
+    )
+    def get(self, request, relative_id):
+        relative = get_object_or_404(Relative, id=relative_id)
+        serializer = RelativeSerializer(relative, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=['Relative'],
+        responses={200: RelativeSerializer},
+        request=RelativeSerializer,
+    )
+    def put(self, request, relative_id):
+        relative = get_object_or_404(Relative, id=relative_id)
+        serializer = RelativeSerializer(relative, data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @extend_schema(
+        tags=['Relative'],
+    )
+    def delete(self, request, relative_id):
+        relative = get_object_or_404(Relative, id=relative_id)
+        relative.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class EventListView(APIView):
     permission_classes = (IsAuthenticated,)
 
