@@ -19,7 +19,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['id', 'title', 'description',]
+        fields = ['id', 'title', 'image', 'description',]
 
     def create(self, validated_data):
         user = self.context['request'].user
