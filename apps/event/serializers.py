@@ -44,7 +44,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        relatives = user.relatives
+        relatives = user.relatives.all()
         event = Event.objects.create(user=user, **validated_data)
         send_sms(user, relatives, event)
         return event
