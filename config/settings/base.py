@@ -7,7 +7,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'ok7uz'
 
 
 LOCAL_APPS = [
