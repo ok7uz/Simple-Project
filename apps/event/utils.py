@@ -12,7 +12,7 @@ def send_sms(user, relatives, event):
     user_name = f'{user.first_name} + {user.last_name}'
     
     for relative in relatives:
-        channel.send_sms_message({
+        sms = channel.send_sms_message({
             "messages": [{
                 "destinations": [{'to': relative.phone_number}],
                 "from": "InfobipSMS",
@@ -21,3 +21,4 @@ def send_sms(user, relatives, event):
                          + response_url.format(user_id=relative.id, event_id=event.id)
             }]
         })
+        print(sms)
