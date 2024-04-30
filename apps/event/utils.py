@@ -14,7 +14,7 @@ def send_sms(user, relatives, event):
             "messages": [{
                 "destinations": [{'to': relative.phone_number}],
                 "from": "InfobipSMS",
-                "text": f"Salom {relative.name}! {user_name} sizni {event.title}ga taklif qilyapti. "
+                "text": f"{user_name} sizni {event.title}ga taklif qilyapti. "
                          "\nOvoz berish: " + response_url.format(user_id=relative.id, event_id=event.id)
             }]
         })
