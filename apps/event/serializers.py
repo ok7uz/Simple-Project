@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_field
 
 from apps.event.models import Relative, Event, Vote
 from apps.event.utils import send_sms
