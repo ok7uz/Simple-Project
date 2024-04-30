@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from apps.event.models import Relative, Event, Vote
+from apps.event.utils import send_sms
 
 
 class RelativeSerializer(serializers.ModelSerializer):
@@ -13,18 +15,6 @@ class RelativeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         return Relative.objects.create(user=user, **validated_data)
-
-
-class EventSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Event
-        fields = ['id', 'title', 'image', 'description',]
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        return Event.objects.create(user=user, **validated_data)
-
 
 
 class VoteSerializer(serializers.ModelSerializer):
@@ -43,3 +33,28 @@ class VoteSerializer(serializers.ModelSerializer):
         validated_data['event'] = event
         validated_data['relative'] = relative
         return super().create(validated_data)
+
+
+class EventSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+    votes = VoteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'image', 'description', 'votes']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        relatives = user.relatives
+        event = Event.objects.create(user=user, **validated_data)
+        send_sms(user, relatives, event)
+        return event
+    
+    # extend_schema_field(VoteSerializer(many=True))
+    # def get_votes(self, event):
+    #     votes = event.votes.all()
+    #     return VoteSerializer(votes, many=True).data
+
+
+
+

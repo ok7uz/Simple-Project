@@ -22,9 +22,15 @@ class Event(models.Model):
     title = models.CharField(max_length=128)
     description = models.TextField()
 
+    def __str__(self):
+        return self.title
+
 
 class Vote(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='votes')
     relative = models.ForeignKey(Relative, on_delete=models.CASCADE, related_name='votes')
     type = models.BooleanField()
+
+    class Meta:
+        unique_together = ('event', 'relative')
