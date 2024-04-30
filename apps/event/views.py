@@ -128,7 +128,7 @@ class EventDetailView(APIView):
 
 
 class VoteView(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     @extend_schema(
         tags=['Vote'],
