@@ -46,7 +46,7 @@ class EventSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         relatives = user.relatives
         event = Event.objects.create(user=user, **validated_data)
-        # send_sms(user, relatives, event)
+        send_sms(user, relatives, event)
         return event
     
     # extend_schema_field(VoteSerializer(many=True))
